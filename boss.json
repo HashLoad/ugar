@@ -1,13 +1,13 @@
 {
 	"name": "ugar",
-	"description": "MongoDb connector like mongoose\r",
-	"version": "0.0.2\r",
+	"description": "MongoDb connector like mongoose",
+	"version": "0.0.2",
 	"private": false,
 	"homepage": "",
 	"mainsrc": "src/",
 	"supported": "xe+",
 	"dprojFile": "",
 	"dependencies": {
-		"github.com/snakeice/TMongoWire": "^1.0.2"
+		"github.com/snakeice/GrijjyFoundation": "^1.02"
 	}
 }

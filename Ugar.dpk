@@ -32,6 +32,16 @@ requires
   rtl;
 
 contains
-  Ugar in 'src\Ugar.pas';
+  Ugar in 'src\Ugar.pas',
+  ugar.db.mongo.Protocol in 'src\ugar.db.mongo.Protocol.pas',
+  ugar.connection.Imp in 'src\ugar.connection.Imp.pas',
+  ugar.db.Mongo in 'src\ugar.db.Mongo.pas',
+  ugar.db.mongo.Imp in 'src\ugar.db.mongo.Imp.pas',
+  ugar.db.mongo.Enum in 'src\ugar.db.mongo.Enum.pas',
+  ugar.db.mongo.Func in 'src\ugar.db.mongo.Func.pas',
+  ugar.db.mongo.internals in 'src\ugar.db.mongo.internals.pas',
+  ugar.db.mongo.Query in 'src\ugar.db.mongo.Query.pas',
+  ugar.db.mongo.protocol.Types in 'src\ugar.db.mongo.protocol.Types.pas';
 
 end.
+
