@@ -47,7 +47,7 @@ type
     function _GetDatabase: IUgarDatabase;
     function _GetName: String;
     function InsertOne(const ADocument: TUgarBsonDocument): Boolean; overload;
-    function InsertOne(const ADocument: TJsonObject): Boolean; overload;
+    function InsertOne(const ADocument: TJsonObject): TJSONObject; overload;
     function InsertOne(const ADocument: string): Boolean; overload;
 
     function InsertMany(const ADocuments: array of TUgarBsonDocument; const AOrdered: Boolean = True): Integer; overload;
@@ -75,7 +75,7 @@ type
     function Find(const AFilter: TUgarFilter; const AProjection: TUgarProjection): IUgarCursor; overload;
     function Find(const AFilter: TUgarFilter): IUgarCursor; overload;
     function Find(const AProjection: TUgarProjection): IUgarCursor; overload;
-    function Find: IUgarCursor; overload;
+    function Find: TJSONArray; overload;
     function Find(const AFilter: TUgarFilter; const ASort: TUgarSort): IUgarCursor; overload;
     function Find(const AFilter: TUgarFilter; const AProjection: TUgarProjection; const ASort: TUgarSort)
       : IUgarCursor; overload;
