@@ -3,13 +3,19 @@ unit ugar.db.Mongo;
 interface
 
 uses
-  Grijjy.Bson, System.Generics.Collections, System.JSON, System.SysUtils, ugar.db.mongo.Enum,
-  ugar.db.mongo.Query;
+  Grijjy.Bson, System.Generics.Collections, System.JSON, System.SysUtils, ugar.db.Mongo.Enum,
+  ugar.db.Mongo.Query;
 
 type
 
   IUgarDatabase = interface;
   IUgarCollection = interface;
+
+  IUgarCursor = interface
+    ['{18813F27-1B41-453C-86FE-E98AFEB3D905}']
+    function GetEnumerator: TEnumerator<TUgarBsonDocument>;
+    function ToArray: TArray<TUgarBsonDocument>;
+  end;
 
   IUgarClient = interface
     ['{66FF5346-48F6-44E1-A46F-D8B958F06EA0}']
@@ -27,6 +33,8 @@ type
     function ListCollections: TArray<TUgarBsonDocument>;
 
     procedure DropCollection(const AName: String);
+    function RunCommand(const ACommand: string): IUgarCursor; overload;
+    function RunCommand(const ACommand: TUgarBsonDocument): IUgarCursor; overload;
     procedure DropDatabase();
 
     function GetCollection(const AName: String): IUgarCollection;
@@ -36,21 +44,16 @@ type
     property Name: String read _GetName;
   end;
 
-  IUgarCursor = interface
-    ['{18813F27-1B41-453C-86FE-E98AFEB3D905}']
-    function GetEnumerator: TEnumerator<TUgarBsonDocument>;
-    function ToArray: TArray<TUgarBsonDocument>;
-  end;
-
   IUgarCollection = interface
     ['{9822579B-1682-4FAC-81CF-A4B239777812}']
     function _GetDatabase: IUgarDatabase;
     function _GetName: String;
     function InsertOne(const ADocument: TUgarBsonDocument): Boolean; overload;
-    function InsertOne(const ADocument: TJsonObject): TJSONObject; overload;
+    function InsertOne(const ADocument: TJsonObject): TJsonObject; overload;
     function InsertOne(const ADocument: string): Boolean; overload;
 
-    function InsertMany(const ADocuments: array of TUgarBsonDocument; const AOrdered: Boolean = True): Integer; overload;
+    function InsertMany(const ADocuments: array of TUgarBsonDocument; const AOrdered: Boolean = True): Integer;
+      overload;
     function InsertMany(const ADocuments: array of TJsonObject; const AOrdered: Boolean = True): Integer; overload;
     function InsertMany(const ADocuments: array of string; const AOrdered: Boolean = True): Integer; overload;
 
@@ -58,7 +61,8 @@ type
     function InsertMany(const ADocuments: TArray<TJsonObject>; const AOrdered: Boolean = True): Integer; overload;
     function InsertMany(const ADocuments: TArray<string>; const AOrdered: Boolean = True): Integer; overload;
 
-    function InsertMany(const ADocuments: TEnumerable<TUgarBsonDocument>; const AOrdered: Boolean = True): Integer; overload;
+    function InsertMany(const ADocuments: TEnumerable<TUgarBsonDocument>; const AOrdered: Boolean = True)
+      : Integer; overload;
     function InsertMany(const ADocuments: TEnumerable<TJsonObject>; const AOrdered: Boolean = True): Integer; overload;
     function InsertMany(const ADocuments: TEnumerable<string>; const AOrdered: Boolean = True): Integer; overload;
 
@@ -66,8 +70,7 @@ type
 
     function DeleteMany(const AFilter: TUgarFilter; const AOrdered: Boolean = True): Integer;
 
-    function UpdateOne(const AFilter: TUgarFilter; const AUpdate: TUgarUpdate;
-      const AUpsert: Boolean = False): Boolean;
+    function UpdateOne(const AFilter: TUgarFilter; const AUpdate: TUgarUpdate; const AUpsert: Boolean = False): Boolean;
 
     function UpdateMany(const AFilter: TUgarFilter; const AUpdate: TUgarUpdate; const AUpsert: Boolean = False;
       const AOrdered: Boolean = True): Integer;
@@ -91,7 +94,7 @@ type
     property Name: String read _GetName;
   end;
 
-  TUgarDatabaseFunction = reference to function(AName: string): IUgarCollection;
+  TUgarDatabaseFunction = reference to function(AName: string = '_'): IUgarCollection;
 
   IUgarConnection = Interface
     function GetDatabase(ADatabaseName: string): TUgarDatabaseFunction;

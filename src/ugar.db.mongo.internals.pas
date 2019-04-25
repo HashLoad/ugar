@@ -29,6 +29,9 @@ type
     procedure DropCollection(const AName: String);
     procedure DropDatabase;
     function GetCollection(const AName: String): IUgarCollection;
+
+    function RunCommand(const ACommand: string): IUgarCursor; overload;
+    function RunCommand(const ACommand: TUgarBsonDocument): IUgarCursor; overload;
   protected
     property Protocol: TUgarMongoProtocol read FProtocol;
     property Name: String read FName;
@@ -216,6 +219,21 @@ begin
   SetLength(Result, LDocs.Count);
   for LIndex := 0 to LDocs.Count - 1 do
     Result[LIndex] := LDocs[LIndex].AsBsonDocument;
+end;
+
+function TUgarDatabase.RunCommand(const ACommand: TUgarBsonDocument): IUgarCursor;
+var
+  Writer: IUgarBsonWriter;
+  Reply: IUgarMongoReply;
+begin
+  Reply := FProtocol.OpQuery(FFullCommandCollectionName, [], 0, -1, ACommand.ToBson, nil);
+  HandleCommandReply(Reply);
+  Result := TUgarCursor.Create(FProtocol, FName, Reply.Documents, Reply.CursorId);
+end;
+
+function TUgarDatabase.RunCommand(const ACommand: string): IUgarCursor;
+begin
+  Result := RunCommand(TgoBsonDocument.Parse(ACommand));
 end;
 
 function TUgarDatabase._GetClient: IUgarClient;
