@@ -29,6 +29,9 @@ type
     procedure DropCollection(const AName: String);
     procedure DropDatabase;
     function GetCollection(const AName: String): IUgarCollection;
+
+    function RunCommand(const ACommand: string): IUgarCursor; overload;
+    function RunCommand(const ACommand: TUgarBsonDocument): IUgarCursor; overload;
   protected
     property Protocol: TUgarMongoProtocol read FProtocol;
     property Name: String read FName;
@@ -94,7 +97,7 @@ type
     function _GetName: String;
 
     function InsertOne(const ADocument: TUgarBsonDocument): Boolean; overload;
-    function InsertOne(const ADocument: TJsonObject): Boolean; overload;
+    function InsertOne(const ADocument: TJsonObject): TJSONObject; overload;
     function InsertOne(const ADocument: string): Boolean; overload;
 
     function InsertMany(const ADocuments: array of TUgarBsonDocument; const AOrdered: Boolean = True): Integer; overload;
@@ -120,7 +123,7 @@ type
     function Find(const AFilter: TUgarFilter; const AProjection: TUgarProjection): IUgarCursor; overload;
     function Find(const AFilter: TUgarFilter): IUgarCursor; overload;
     function Find(const AProjection: TUgarProjection): IUgarCursor; overload;
-    function Find: IUgarCursor; overload;
+    function Find: TJSONArray; overload;
     function Find(const AFilter: TUgarFilter; const ASort: TUgarSort): IUgarCursor; overload;
     function Find(const AFilter: TUgarFilter; const AProjection: TUgarProjection; const ASort: TUgarSort)
       : IUgarCursor; overload;
@@ -216,6 +219,21 @@ begin
   SetLength(Result, LDocs.Count);
   for LIndex := 0 to LDocs.Count - 1 do
     Result[LIndex] := LDocs[LIndex].AsBsonDocument;
+end;
+
+function TUgarDatabase.RunCommand(const ACommand: TUgarBsonDocument): IUgarCursor;
+var
+  Writer: IUgarBsonWriter;
+  Reply: IUgarMongoReply;
+begin
+  Reply := FProtocol.OpQuery(FFullCommandCollectionName, [], 0, -1, ACommand.ToBson, nil);
+  HandleCommandReply(Reply);
+  Result := TUgarCursor.Create(FProtocol, FName, Reply.Documents, Reply.CursorId);
+end;
+
+function TUgarDatabase.RunCommand(const ACommand: string): IUgarCursor;
+begin
+  Result := RunCommand(TgoBsonDocument.Parse(ACommand));
 end;
 
 function TUgarDatabase._GetClient: IUgarClient;
@@ -354,9 +372,19 @@ begin
   Result := TUgarCursor.Create(FProtocol, FFullName, Reply.Documents, Reply.CursorId);
 end;
 
-function TUgarCollection.Find: IUgarCursor;
+function TUgarCollection.Find: TJSONArray;
+var
+  LBSON: TEnumerator<TUgarBsonDocument>;
 begin
-  Result := Find(nil, nil);
+  Result := TJSONArray.Create;
+
+  LBSON := Find(nil, nil).GetEnumerator;
+
+  while LBSON.MoveNext do
+  begin
+    Result.AddElement(TJSONObject.ParseJSONValue(LBSON.Current.ToJson));
+  end;
+
 end;
 
 function TUgarCollection.FindOne(const AFilter, AProjection: TBytes): TUgarBsonDocument;
@@ -466,9 +494,10 @@ begin
   Result := (HandleCommandReply(Reply) = 1);
 end;
 
-function TUgarCollection.InsertOne(const ADocument: TJsonObject): Boolean;
+function TUgarCollection.InsertOne(const ADocument: TJsonObject): TJSONObject;
 begin
-  Result := InsertOne(TUgarBsonDocument.Parse(ADocument.ToJSON));
+  InsertOne(TUgarBsonDocument.Parse(ADocument.ToJSON));
+  Result := ADocument;
 end;
 
 function TUgarCollection.InsertMany(const ADocuments: TArray<TJsonObject>; const AOrdered: Boolean): Integer;
@@ -656,8 +685,10 @@ begin
   if Result then
     Inc(FIndex)
   else if (FCursorId <> 0) then
+  begin
     GetMore;
-  Result := (FPage <> nil);
+    Result := (FPage <> nil);
+  end;
 end;
 
 procedure TUgarCursor.TEnumerator.GetMore;
