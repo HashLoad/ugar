@@ -223,12 +223,11 @@ end;
 
 function TUgarDatabase.RunCommand(const ACommand: TUgarBsonDocument): IUgarCursor;
 var
-  Writer: IUgarBsonWriter;
   Reply: IUgarMongoReply;
 begin
   Reply := FProtocol.OpQuery(FFullCommandCollectionName, [], 0, -1, ACommand.ToBson, nil);
   HandleCommandReply(Reply);
-  Result := TUgarCursor.Create(FProtocol, FName, Reply.Documents, Reply.CursorId);
+  Result := TUgarCursor.Create(FProtocol, UTF8String(FName), Reply.Documents, Reply.CursorId);
 end;
 
 function TUgarDatabase.RunCommand(const ACommand: string): IUgarCursor;
