@@ -2,11 +2,9 @@
 	"name": "ugar",
 	"description": "MongoDb connector like mongoose",
 	"version": "0.0.2",
-	"private": false,
 	"homepage": "",
 	"mainsrc": "src/",
-	"supported": "xe+",
-	"dprojFile": "",
+	"projects": [],
 	"dependencies": {
 		"github.com/snakeice/GrijjyFoundation": "^1.02"
 	}

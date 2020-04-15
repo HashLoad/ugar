@@ -1,0 +1,14 @@
+{
+	"hash": "40fd1d3faef36114a2fc365dc84dd327",
+	"updated": "2020-04-13T10:52:38.4097451-03:00",
+	"installedModules": {
+		"github.com/snakeice/grijjyfoundation": {
+			"name": "GrijjyFoundation",
+			"version": "1.2.5",
+			"hash": "459ddee82133778fdd9ec6290bdbc07e",
+			"artifacts": {},
+			"failed": false,
+			"changed": false
+		}
+	}
+}
